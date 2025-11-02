@@ -211,7 +211,9 @@ def generate_default_hardware_description_file(
     for joint_descr in root.findall('./joint'):
         child_obj = joint_descr.find('./child')
         assert child_obj is not None
-        links.remove(child_obj.get('link'))
+        link = child_obj.get('link')
+        if link is not None:
+            links.remove(link)
     link_root = next(iter(links))
 
     # Extract the list of parent and child links, excluding the one related
@@ -250,7 +252,7 @@ def generate_default_hardware_description_file(
 
         # Extract sensors
         for gazebo_sensor_descr in gazebo_plugin_descr.iterfind('sensor'):
-            sensor_info = OrderedDict(body_name=body_name)
+            sensor_info: Dict[str, Any] = OrderedDict(body_name=body_name)
 
             # Extract the sensor name
             sensor_name = gazebo_sensor_descr.attrib['name']
@@ -331,10 +333,10 @@ def generate_default_hardware_description_file(
             if plugin == "libgazebo_ros_force.so":
                 body_name_obj = gazebo_plugin_descr.find('bodyName')
                 assert body_name_obj is not None
-                body_name = body_name_obj.text
+                body_name_text = body_name_obj.text
                 force_sensor_info = sensors_info[ForceSensor.type]
-                force_sensor_info[f"{body_name}Wrench"] = OrderedDict(
-                    frame_name=body_name)
+                force_sensor_info[f"{body_name_text}Wrench"] = OrderedDict(
+                    frame_name=body_name_text)
             else:
                 LOGGER.warning("Unsupported Gazebo plugin '%s'", plugin)
 
@@ -422,9 +424,9 @@ def generate_default_hardware_description_file(
         sensor_info['motor_name'] = motor_name
 
         # Extract the associated joint name
-        joint_descr = transmission_descr.find('./joint')
-        assert isinstance(joint_descr, ET.Element)
-        joint_name = joint_descr.attrib['name']
+        transmission_joint_descr = transmission_descr.find('./joint')
+        assert isinstance(transmission_joint_descr, ET.Element)
+        joint_name = transmission_joint_descr.attrib['name']
         motor_info['joint_name'] = joint_name
         joint_transmissions.add(joint_name)
 
@@ -466,16 +468,16 @@ def generate_default_hardware_description_file(
 
     # Define default encoder sensors, and default effort sensors if no
     # transmission available.
-    for joint_descr in root.iterfind('joint'):
+    for root_joint_descr in root.iterfind('joint'):
         encoder_info = OrderedDict()
 
         # Skip fixed joints
-        joint_type = joint_descr.attrib['type'].casefold()
+        joint_type = root_joint_descr.attrib['type'].casefold()
         if joint_type == 'fixed':
             continue
 
         # Extract the joint name
-        joint_name = joint_descr.attrib['name']
+        joint_name = root_joint_descr.attrib['name']
         encoder_info['joint_name'] = joint_name
 
         # Add the sensor to the robot's hardware
@@ -484,7 +486,7 @@ def generate_default_hardware_description_file(
 
         # Add motors to robot hardware by default if no transmission found
         if not joint_transmissions:
-            joint_limit_descr = joint_descr.find('./limit')
+            joint_limit_descr = root_joint_descr.find('./limit')
             assert joint_limit_descr is not None
             if float(joint_limit_descr.attrib['effort']) == 0.0:
                 continue

@@ -24,7 +24,7 @@ from traceback import TracebackException
 from pathlib import PureWindowsPath
 from contextlib import AbstractContextManager
 from typing import (
-    Dict, Any, List, Callable, Optional, Tuple, Union, Sequence, Literal, Type)
+    Dict, Any, List, Callable, Optional, Tuple, Union, Sequence, Literal, Type, Iterable)
 
 import numpy as np
 
@@ -1357,8 +1357,11 @@ class Panda3dApp(panda3d_viewer.viewer_app.ViewerApp):
             # Parse the mesh file toe extract axis up if provided
             def parse_xml(xml_path: str) -> Tuple[ET.Element, Dict[str, str]]:
                 xml_iter = ET.iterparse(xml_path, events=["start-ns"])
-                xml_namespaces = dict(prefix_namespace_pair
-                                      for _, prefix_namespace_pair in xml_iter)
+                prefix_namespace_pairs: Iterable[tuple[str, str]] = (
+                    prefix_namespace_pair
+                    for _, prefix_namespace_pair in xml_iter
+                )
+                xml_namespaces = dict(prefix_namespace_pairs)
                 return (xml_iter.root,  # type: ignore[attr-defined]
                         xml_namespaces)
 
