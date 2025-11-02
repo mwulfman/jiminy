@@ -2140,7 +2140,7 @@ class Viewer:
         # Add new marker
         create_shape = getattr(self._gui, f"append_{shape}")
         create_shape(self._markers_group, name, **shape_kwargs)
-        assert isinstance(pose, Union[np.ndarray, Callable[[], np.ndarray]])
+        assert isinstance(pose, np.ndarray) or callable(pose)
         marker_data: MarkerDataType = {
             "pose": pose, "scale": scale, "color": color}
         self.markers[name] = marker_data
