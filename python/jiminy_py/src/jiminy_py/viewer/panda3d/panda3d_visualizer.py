@@ -24,7 +24,18 @@ from traceback import TracebackException
 from pathlib import PureWindowsPath
 from contextlib import AbstractContextManager
 from typing import (
-    Dict, Any, List, Callable, Optional, Tuple, Union, Sequence, Literal, Type, Iterable)
+    Dict,
+    Any,
+    List,
+    Callable,
+    Optional,
+    Tuple,
+    Union,
+    Sequence,
+    Literal,
+    Type,
+    Iterable,
+)
 
 import numpy as np
 
