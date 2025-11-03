@@ -162,7 +162,7 @@ setup(
             # Python linter
             "pylint>=3.1",
             # Python static type checker
-            "mypy>=1.5.0",
+            "mypy>=1.5.0,<1.18",
             # Dependency for documentation generation
             "pygments",
             # Dependency for documentation generation
